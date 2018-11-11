@@ -1,4 +1,7 @@
 # Go-Paperspace
+
+[![GoDoc](https://godoc.org/github.com/TimDurward/go-paperspace?status.svg)](https://godoc.org/github.com/TimDurward/go-paperspace)
+ 
 Go-Paperspace is a Go client library for accessing the Paperspace API.
 
 You can view the client API docs here: https://godoc.org/github.com/TimDurward/go-paperspace
