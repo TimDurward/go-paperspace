@@ -7,7 +7,10 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strings"
+
+	"github.com/google/go-querystring/query"
 )
 
 const (
@@ -42,7 +45,8 @@ type Client struct {
 	Config *Config
 
 	// Services used for talking to different parts of the Paperspace API.
-	Scripts *ScriptsService
+	Scripts  *ScriptsService
+	Machines *MachinesService
 }
 
 // Response is a Paperspace response. This wraps the standard http.Response returned from Paperspace.
@@ -50,13 +54,35 @@ type Response struct {
 	*http.Response
 }
 
-// ErrorResponse reports the error caused by an API request
+// ErrorResponse reports the error caused by an API request.
 type ErrorResponse struct {
 	// HTTP response that caused this error
 	Response *http.Response
 
 	// Error message
 	Message string `json:"message"`
+}
+
+// addOptions adds the parameters in opt as URL query parameters to s. opt
+// must be a struct whose fields may contain "url" tags.
+func addOptions(s string, opt interface{}) (string, error) {
+	v := reflect.ValueOf(opt)
+	if v.Kind() == reflect.Ptr && v.IsNil() {
+		return s, nil
+	}
+
+	u, err := url.Parse(s)
+	if err != nil {
+		return s, err
+	}
+
+	qs, err := query.Values(opt)
+	if err != nil {
+		return s, err
+	}
+
+	u.RawQuery = qs.Encode()
+	return u.String(), nil
 }
 
 // NewClient returns a new Paperspace API client.
@@ -79,6 +105,7 @@ func NewClient(config *Config, httpClient *http.Client) (*Client, error) {
 		Config:    config,
 	}
 	c.Scripts = &ScriptsService{client: c}
+	c.Machines = &MachinesService{client: c}
 
 	return c, nil
 }
@@ -87,8 +114,13 @@ func NewClient(config *Config, httpClient *http.Client) (*Client, error) {
 // A relative URL can be provided in urlStr, in which case it is resolved relative to the baseURL of the Client.
 // If specified, the value pointed to by body is JSON encoded and included as the request body.
 func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) {
+	if !strings.HasSuffix(c.BaseURL.Path, "/") {
+		return nil, fmt.Errorf("BaseURL must have a trailing slash, but %q does not", c.BaseURL)
+	}
+
 	rel, err := url.Parse(urlStr)
 	if err != nil {
+		fmt.Print("errorr")
 		return nil, err
 	}
 	// Relative URLs should be specified without a preceding slash since baseURL will have the trailing slash
@@ -126,21 +158,21 @@ func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Print(httpResp)
 
+	defer httpResp.Body.Close()
+
+	resp := newResponse(httpResp)
 	err = CheckResponse(httpResp)
 	if err != nil {
 		return nil, err
 	}
 	if v != nil {
 		// Open a NewDecoder and defer closing the reader only if there is a provided interface to decode to
-		defer httpResp.Body.Close()
 		err = json.NewDecoder(httpResp.Body).Decode(v)
 		if err != nil {
 			return nil, err
 		}
 	}
-	resp := newResponse(httpResp)
 	return resp, err
 }
 
