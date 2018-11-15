@@ -33,7 +33,7 @@ type Machines struct {
 	NetworkID              string `json:"networkId,omitempty"`
 	PrivateIPAddress       string `json:"privateIpAddress,omitempty"`
 	PublicIPAddress        string `json:"publicIpAddress,omitempty"`
-	DynamicPublicIP        string `json:"dynamicPublicIp,omitempty"`
+	DynamicPublicIP        bool   `json:"dynamicPublicIp,omitempty"`
 	Region                 string `json:"region,omitempty"`
 	UserID                 string `json:"userId,omitempty"`
 	TeamID                 string `json:"teamId,omitempty"`
@@ -86,31 +86,31 @@ func (s *MachinesService) Availability(opt *MachineOptions) (*Machines, *Respons
 		return nil, nil, err
 	}
 
-	machines := new(Machines)
-	resp, err := s.client.Do(req, &machines)
+	machine := new(Machines)
+	resp, err := s.client.Do(req, &machine)
 	if err != nil {
 		return nil, resp, err
 	}
 
-	return machines, resp, err
+	return machine, resp, err
 }
 
 // Create creates new a virtual machine.
 // https://paperspace.github.io/paperspace-node/machines.html#.create
-func (s *MachinesService) Create(machineReq *MachinesRequest) (*Machines, *Response, error) {
+func (s *MachinesService) Create(mr *MachinesRequest) (*Machines, *Response, error) {
 	apiEndpoint := "machines/createSingleMachinePublic"
 
-	req, err := s.client.NewRequest(http.MethodGet, apiEndpoint, machineReq)
+	req, err := s.client.NewRequest(http.MethodPost, apiEndpoint, mr)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	machines := new(Machines)
-	resp, err := s.client.Do(req, &machines)
+	machine := new(Machines)
+	resp, err := s.client.Do(req, &machine)
 	if err != nil {
 		fmt.Print(err)
 		return nil, resp, err
 	}
 
-	return machines, resp, nil
+	return machine, resp, nil
 }
