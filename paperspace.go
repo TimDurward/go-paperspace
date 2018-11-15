@@ -154,26 +154,39 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 // Do sends an API request and returns the API response.
 // The API response is JSON decoded and stored in the value pointed to by v, or returned as an error if an API error has occurred.
 func (c *Client) Do(req *http.Request, v interface{}) (*Response, error) {
-	httpResp, err := c.client.Do(req)
+	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
 
-	defer httpResp.Body.Close()
+	defer func() {
+		if rerr := resp.Body.Close(); err == nil {
+			err = rerr
+		}
+	}()
 
-	resp := newResponse(httpResp)
-	err = CheckResponse(httpResp)
+	response := newResponse(resp)
+
+	err = CheckResponse(resp)
 	if err != nil {
-		return nil, err
+		return response, err
 	}
+
 	if v != nil {
-		// Open a NewDecoder and defer closing the reader only if there is a provided interface to decode to
-		err = json.NewDecoder(httpResp.Body).Decode(v)
-		if err != nil {
-			return nil, err
+		if w, ok := v.(io.Writer); ok {
+			_, err = io.Copy(w, resp.Body)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			err = json.NewDecoder(resp.Body).Decode(v)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
-	return resp, err
+
+	return response, err
 }
 
 // CheckResponse checks the Paperpspace API response for a non-2xx status code.
@@ -182,7 +195,7 @@ func CheckResponse(r *http.Response) error {
 		return nil
 	}
 
-	err := fmt.Errorf("Request failed. Please analyze the request body for more details. Status code: %d", r.StatusCode)
+	err := fmt.Errorf(r.Status)
 	return err
 }
 
