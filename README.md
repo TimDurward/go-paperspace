@@ -24,13 +24,22 @@ config := &paperspace.Config{
 client, _ := paperspace.NewClient(config, nil)
 
 opts := &paperspace.MachineOptions{
-  Region:      "East Coast (NY2)",
+  Region:      "West Coast (CA1)",
   MachineType: "GPU+",
 }
 
-// Machine Availability
-// https://paperspace.github.io/paperspace-node/machines.html#.availability
-machines, _, err := paperspaceClient.Machines.Availability(opts)
+// Create Machine
+// https://paperspace.github.io/paperspace-node/machines.html#.create
+m := &paperspace.MachinesRequest{
+  Region:      "West Coast (CA1)",
+  MachineType: "Air",
+  Size:        50,
+  BillingType: "monthly",
+  MachineName: "Provisioned using Go API client.",
+  TemplateID:  "<template_id>",
+}
+  
+machine, _, err := paperspaceClient.Machines.Create(m)
 ```
 
 
