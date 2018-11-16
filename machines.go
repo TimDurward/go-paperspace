@@ -14,13 +14,14 @@ type MachinesService struct {
 // Machines represents a Paperspace Machine.
 type Machines struct {
 	ID                     string `json:"id,omitempty"`
+	MachineID              string `json:"machineId,omityempty"`
 	Name                   string `json:"name,omitempty"`
 	OS                     string `json:"os,omitempty"`
 	RAM                    string `json:"ram,omitempty"`
 	GPU                    string `json:"gpu,omitempty"`
 	Cpus                   int    `json:"cpus,omitempty"`
-	StorageTotal           int    `json:"storageTotal,omitempty"`
-	StorageUsed            int    `json:"storageUsed,omitempty"`
+	StorageTotal           string `json:"storageTotal,omitempty"`
+	StorageUsed            string `json:"storageUsed,omitempty"`
 	UsageRate              string `json:"usageRate,omitempty"`
 	ShutdownTimeoutInHours int    `json:"shutdownTimeoutInHours,omitempty"`
 	ShutdownTimeoutForces  bool   `json:"shutdownTimeoutForces,omitempty"`
@@ -92,7 +93,7 @@ func (s *MachinesService) Availability(opt *MachineOptions) (*Machines, *Respons
 		return nil, resp, err
 	}
 
-	return machine, resp, err
+	return machine, resp, nil
 }
 
 // Create creates new a virtual machine.
@@ -113,4 +114,43 @@ func (s *MachinesService) Create(mr *MachinesRequest) (*Machines, *Response, err
 	}
 
 	return machine, resp, nil
+}
+
+// Destroy destroys an existing virtual machine.
+// https://paperspace.github.io/paperspace-node/machines.html#.destroy
+func (s *MachinesService) Destroy(machineID string) (*Response, error) {
+	apiEndpoint := fmt.Sprintf("machines/%s/destroyMachine", machineID)
+
+	req, err := s.client.NewRequest(http.MethodPost, apiEndpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+	if err != nil {
+		fmt.Print(err)
+		return resp, err
+	}
+
+	return resp, nil
+}
+
+// List lists information about all machines available to the authenticated user or team.
+// https://paperspace.github.io/paperspace-node/machines.html#.list
+func (s *MachinesService) List(filter ...*Machines) ([]*Machines, *Response, error) {
+	apiEndpoint := "machines/getMachines"
+
+	req, err := s.client.NewRequest(http.MethodGet, apiEndpoint, filter)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var machines []*Machines
+	resp, err := s.client.Do(req, &machines)
+	if err != nil {
+		fmt.Print(err)
+		return nil, resp, err
+	}
+
+	return machines, resp, nil
 }
