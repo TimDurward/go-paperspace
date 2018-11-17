@@ -42,6 +42,18 @@ type Machines struct {
 	DtCreated              string `json:"dtCreated,omitempty"`
 	DtLastRun              string `json:"dtLastRun,omitempty"`
 	Available              bool   `json:"available,omitempty"`
+	Events                 []Events
+}
+
+// Events represents a Paperspace machine event.
+type Events struct {
+	Name       string `json:"name,omitempty"`
+	State      string `json:"state,omitempty"`
+	ErrorMsg   string `json:"errorMsg,omitempty"`
+	Handle     string `json:"handle,omitempty"`
+	DtModified string `json:"dtModified,omitempty"`
+	DtFinished string `json:"dtFinished,omitempty"`
+	DtCreated  string `json:"dtCreated,omitempty"`
 }
 
 // MachinesRequest represents a request to create a Paperspace Machine.
@@ -68,6 +80,7 @@ type MachinesRequest struct {
 // MachineOptions specifies the optional parameters to the
 // MachinesService.Availability method.
 type MachineOptions struct {
+	MachineID   string `url:"machineId,omitempty"`
 	Region      string `url:"region,omitempty"`
 	MachineType string `url:"machineType,omitempty"`
 }
@@ -137,10 +150,10 @@ func (s *MachinesService) Destroy(machineID string) (*Response, error) {
 
 // List lists information about all machines available to the authenticated user or team.
 // https://paperspace.github.io/paperspace-node/machines.html#.list
-func (s *MachinesService) List(filter ...*Machines) ([]*Machines, *Response, error) {
+func (s *MachinesService) List() ([]*Machines, *Response, error) {
 	apiEndpoint := "machines/getMachines"
 
-	req, err := s.client.NewRequest(http.MethodGet, apiEndpoint, filter)
+	req, err := s.client.NewRequest(http.MethodGet, apiEndpoint, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -153,4 +166,106 @@ func (s *MachinesService) List(filter ...*Machines) ([]*Machines, *Response, err
 	}
 
 	return machines, resp, nil
+}
+
+// Restart restarts an existing virtual machine.
+// https://paperspace.github.io/paperspace-node/machines.html#.restart
+func (s *MachinesService) Restart(machineID string) (*Response, error) {
+	apiEndpoint := fmt.Sprintf("machines/%s/restart", machineID)
+
+	req, err := s.client.NewRequest(http.MethodPost, apiEndpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+	if err != nil {
+		fmt.Print(err)
+		return resp, err
+	}
+
+	return resp, nil
+}
+
+// Show shows machine information.
+// https://paperspace.github.io/paperspace-node/machines.html#.show
+func (s *MachinesService) Show(opt *MachineOptions) (*Machines, *Response, error) {
+	apiEndpoint := "machines/getMachinePublic"
+
+	url, err := addOptions(apiEndpoint, opt)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	req, err := s.client.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	machine := new(Machines)
+	resp, err := s.client.Do(req, machine)
+	if err != nil {
+		fmt.Print(err)
+		return nil, resp, err
+	}
+
+	return machine, resp, nil
+}
+
+// Start starts an existing virtual machine.
+// https://paperspace.github.io/paperspace-node/machines.html#.start
+func (s *MachinesService) Start(machineID string) (*Response, error) {
+	apiEndpoint := fmt.Sprintf("machines/%s/start", machineID)
+
+	req, err := s.client.NewRequest(http.MethodPost, apiEndpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+	if err != nil {
+		fmt.Print(err)
+		return resp, err
+	}
+
+	return resp, nil
+}
+
+// Stop stops an existing virtual machine.
+// https://paperspace.github.io/paperspace-node/machines.html#.stop
+func (s *MachinesService) Stop(machineID string) (*Response, error) {
+	apiEndpoint := fmt.Sprintf("machines/%s/stop", machineID)
+
+	req, err := s.client.NewRequest(http.MethodPost, apiEndpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := s.client.Do(req, nil)
+	if err != nil {
+		fmt.Print(err)
+		return resp, err
+	}
+
+	return resp, nil
+}
+
+// Update updates attributes of a virtual machine.
+// https://paperspace.github.io/paperspace-node/machines.html#.update
+func (s *MachinesService) Update(m *Machines) (*Response, error) {
+	apiEndpoint := fmt.Sprintf("machines/%s/updateMachinePublic", m.MachineID)
+
+	req, err := s.client.NewRequest(http.MethodPost, apiEndpoint, m)
+	if err != nil {
+		return nil, err
+	}
+
+	machine := new(Machines)
+	resp, err := s.client.Do(req, &machine)
+	if err != nil {
+		fmt.Print(err)
+		return resp, err
+	}
+
+	return resp, nil
 }
