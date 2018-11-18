@@ -19,11 +19,6 @@ config := &paperspace.Config{
 // Default http.Client
 client, _ := paperspace.NewClient(config, nil)
 
-opts := &paperspace.MachineOptions{
-  Region:      "West Coast (CA1)",
-  MachineType: "GPU+",
-}
-
 // Create Machine
 // https://paperspace.github.io/paperspace-node/machines.html#.create
 m := &paperspace.MachinesRequest{
