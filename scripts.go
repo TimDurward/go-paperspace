@@ -39,7 +39,7 @@ func (s *ScriptsService) Create(options *Scripts) (*Scripts, *Response, error) {
 	return scripts, resp, nil
 }
 
-// List gets all scripts from Paperspace.
+// List lists all scripts from Paperspace.
 // https://paperspace.github.io/paperspace-node/scripts.html#.list
 func (s *ScriptsService) List() (*Scripts, *Response, error) {
 	apiEndpoint := "scripts/getScripts"
