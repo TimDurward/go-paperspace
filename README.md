@@ -1,12 +1,8 @@
-# Go-Paperspace
+# go-paperspace
 
 [![GoDoc](https://godoc.org/github.com/TimDurward/go-paperspace?status.svg)](https://godoc.org/github.com/TimDurward/go-paperspace)
  
-Go-Paperspace is a Go client library for accessing the Paperspace API.
-
-You can view the client API docs here: https://godoc.org/github.com/TimDurward/go-paperspace
-
-You can view Paperspace API docs here: https://www.paperspace.com/api
+go-paperspace is a Go client library for accessing the [Paperspace API](https://www.paperspace.com/api).
 
 # Usage
 ```go
@@ -39,24 +35,20 @@ m := &paperspace.MachinesRequest{
   TemplateID:  "<template_id>",
 }
   
-machine, _, err := paperspaceClient.Machines.Create(m)
+machine, _, err := client.Machines.Create(m)
 ```
 
 
 # 🔨 WIP 🔧
-### Done:
-1. Paperspace Client
-2. Base http Requests and Response handling.
-3. Scripts methods semi complete.
-4. Some of Machines methods complete.
-
-### Not Done:
-1. Most of Machine methods
-2. Network methods
-3. Project methods
-4. Jobs methods
-5. Tests
-6. Versioning
+### Client v1 Coverage
+- [x] Base Paperspace Client
+- [x] Machines Service
+- [x] Networks Service
+- [ ] Scripts Service
+- [ ] Templates Service
+- [ ] Jobs Service
+- [ ] Tests
+- [ ] Versioning
 
 # Contributing
 #### Feel free to submit a Github issue in regards to questions.
