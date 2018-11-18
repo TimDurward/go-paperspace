@@ -78,7 +78,7 @@ type MachinesRequest struct {
 }
 
 // MachineOptions specifies the optional parameters to the
-// MachinesService.Availability method.
+// MachinesService.Availability & MachinesService.Show methods.
 type MachineOptions struct {
 	MachineID   string `url:"machineId,omitempty"`
 	Region      string `url:"region,omitempty"`
