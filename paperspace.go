@@ -47,6 +47,7 @@ type Client struct {
 	// Services used for talking to different parts of the Paperspace API.
 	Scripts  *ScriptsService
 	Machines *MachinesService
+	Networks *NetworksService
 }
 
 // Response is a Paperspace response. This wraps the standard http.Response returned from Paperspace.
@@ -104,8 +105,9 @@ func NewClient(config *Config, httpClient *http.Client) (*Client, error) {
 		UserAgent: userAgent,
 		Config:    config,
 	}
-	c.Scripts = &ScriptsService{client: c}
 	c.Machines = &MachinesService{client: c}
+	c.Networks = &NetworksService{client: c}
+	c.Scripts = &ScriptsService{client: c}
 
 	return c, nil
 }
