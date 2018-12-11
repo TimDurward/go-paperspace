@@ -2,6 +2,7 @@ package paperspace
 
 import (
 	"net/http"
+	"time"
 )
 
 // ScriptsService manages Scripts for the Paperspace API.
@@ -12,18 +13,30 @@ type ScriptsService struct {
 
 // Scripts represents a Paperspace Script.
 type Scripts struct {
-	ID                string `json:"id,omitempty"`
+	ID          string    `json:"id,omitempty"`
+	Name        string    `json:"name,omitempty"`
+	OwnerType   string    `json:"ownerType,omitempty"`
+	OwnerID     string    `json:"ownerId,omitempty"`
+	Description string    `json:"description,omitempty"`
+	DtCreated   time.Time `json:"dtCreated,omitempty"`
+	IsEnabled   bool      `json:"isEnabled,omitempty"`
+	RunOnce     bool      `json:"runOnce,omitempty"`
+}
+
+// ScriptsRequest represents a request to create a Paperspace Script.
+type ScriptsRequest struct {
+	MachineID         string `json:"machineId,omitempty"`
 	ScriptName        string `json:"scriptName,omitempty"`
-	ScriptDescription string `json:"scriptDescription,omitempty"`
 	ScriptFile        string `json:"scriptFile,omitempty"`
 	ScriptText        string `json:"scriptText,omitempty"`
+	ScriptDescription string `json:"scriptDescription,omitempty"`
 	IsEnabled         bool   `json:"isEnabled,omitempty"`
 	RunOnce           bool   `json:"runOnce,omitempty"`
 }
 
 // Create creates a new Paperspace Script based on given parameters.
 // https://paperspace.github.io/paperspace-node/scripts.html#.create
-func (s *ScriptsService) Create(options *Scripts) (*Scripts, *Response, error) {
+func (s *ScriptsService) Create(options *ScriptsRequest) (*Scripts, *Response, error) {
 	apiEndpoint := "scripts/createScript"
 	req, err := s.client.NewRequest(http.MethodPost, apiEndpoint, options)
 	if err != nil {
